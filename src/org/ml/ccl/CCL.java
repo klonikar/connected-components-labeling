@@ -1,6 +1,7 @@
 package org.ml.ccl;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -15,6 +16,7 @@ public class CCL
 {
     private int[][] _board;
     private BufferedImage _input;
+    private Graphics inputGD;
     private int _width;
     private int _height;
     private int backgroundColor;
@@ -32,11 +34,14 @@ public class CCL
         Map<Integer, List<Pixel>> patterns = Find();
         Map<Integer, BufferedImage> images = new HashMap<Integer, BufferedImage>();
 
+        inputGD = _input.getGraphics();
+        inputGD.setColor(Color.BLUE);
         for(Integer id : patterns.keySet())
         {
             BufferedImage bmp = CreateBitmap(patterns.get(id));
             images.put(id, bmp);
         }
+        inputGD.dispose();
 
         return images;
     }
@@ -185,7 +190,7 @@ public class CCL
 
         int minY = Min(pattern, false);
         int maxY = Max(pattern, false);
-
+        
         int width = maxX + 1 - minX;
         int height = maxY + 1 - minY;
 
@@ -195,6 +200,8 @@ public class CCL
         {
             bmp.setRGB(pix.Position.x - minX, pix.Position.y - minY, pix.color.getRGB());//shift position by minX and minY
         }
+        
+        inputGD.drawRect(minX, minY, maxX-minX, maxY-minY);
 
         return bmp;
     }
@@ -205,6 +212,10 @@ public class CCL
     
     public static String getFileNameExtension(String fileName) {
     	return fileName.substring(fileName.indexOf('.') + 1);
+    }
+    
+    public BufferedImage getProcessedImage() {
+    	return _input;
     }
     
     // Sample usage:
@@ -224,12 +235,13 @@ public class CCL
     		BufferedImage img = ImageIO.read(new File(args[0]));
     		// TODO: Obtain background color.
     		// An attempt to obtain bg color automatically: Center of image.
-    		//System.out.println("image bg color: " + img.getRGB(img.getWidth()/2, img.getHeight()/2));
+    		System.out.println("image bg color: " + img.getRGB(img.getWidth()/2, img.getHeight()/2));
     		Map<Integer, BufferedImage> components = ccl.Process(img, bgColor);
+    		String format = getFileNameExtension(args[0]);
     		for(Integer c : components.keySet()) {
-    			String format = getFileNameExtension(args[0]);
     			ImageIO.write(components.get(c), format, new File(getBaseFileName(args[0]) + "-component-" + c + "."  + format));
     		}
+    		ImageIO.write(ccl.getProcessedImage(), format, new File(getBaseFileName(args[0]) + "-processed" + "." + format));
     	} catch(Exception ex) {
     		ex.printStackTrace();
     	}
