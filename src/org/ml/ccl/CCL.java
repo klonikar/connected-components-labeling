@@ -2,7 +2,6 @@ package org.ml.ccl;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -50,16 +49,16 @@ public class CCL
     {
     	// check if pixel color is backgroundColor (white).
         //return currentPixel.color.getAlpha() == 255 && currentPixel.color.getRed() == 255 && currentPixel.color.getGreen() == 255 && currentPixel.color.getBlue() == 255;
-    	return currentPixel.color.getRGB() == backgroundColor;
+    	return currentPixel.color == backgroundColor;
     }
 
     private static int Min(List<Integer> neighboringLabels, Map<Integer, Label> allLabels) {
     	if(neighboringLabels.isEmpty())
     		return 0; // TODO: is 0 appropriate for empty list
     	
-    	int ret = allLabels.get(neighboringLabels.get(0)).GetRoot().Name;
+    	int ret = allLabels.get(neighboringLabels.get(0)).GetRoot().name;
     	for(Integer n : neighboringLabels) {
-    		int curVal = allLabels.get(n).GetRoot().Name;
+    		int curVal = allLabels.get(n).GetRoot().name;
     		ret = (ret < curVal ? ret : curVal);
     	}
     	return ret;
@@ -69,9 +68,9 @@ public class CCL
     	if(pattern.isEmpty())
     		return 0; // TODO: is 0 appropriate for empty list
     	
-    	int ret = (xOrY ? pattern.get(0).Position.x : pattern.get(0).Position.y);
+    	int ret = (xOrY ? pattern.get(0).x : pattern.get(0).y);
     	for(Pixel p : pattern) {
-    		int curVal = (xOrY ? p.Position.x : p.Position.y);
+    		int curVal = (xOrY ? p.x : p.y);
     		ret = (ret < curVal ? ret : curVal);
     	}
     	return ret;
@@ -81,9 +80,9 @@ public class CCL
     	if(pattern.isEmpty())
     		return 0; // TODO: is 0 appropriate for empty list
     	
-    	int ret = (xOrY ? pattern.get(0).Position.x : pattern.get(0).Position.y);
+    	int ret = (xOrY ? pattern.get(0).x : pattern.get(0).y);
     	for(Pixel p : pattern) {
-    		int curVal = (xOrY ? p.Position.x : p.Position.y);
+    		int curVal = (xOrY ? p.x : p.y);
     		ret = (ret > curVal ? ret : curVal);
     	}
     	return ret;
@@ -98,7 +97,7 @@ public class CCL
         {
             for (int j = 0; j < _width; j++)
             {
-                Pixel currentPixel = new Pixel(new Point(j, i), new Color(_input.getRGB(j, i)));
+                Pixel currentPixel = new Pixel(j, i, _input.getRGB(j, i));
 
                 if (CheckIsBackGround(currentPixel))
                 {
@@ -121,7 +120,7 @@ public class CCL
 
                     for (Integer neighbor : neighboringLabels)
                     {
-                        if (root.Name != allLabels.get(neighbor).GetRoot().Name)
+                        if (root.name != allLabels.get(neighbor).GetRoot().name)
                         {
                             allLabels.get(neighbor).Join(allLabels.get(currentLabel));
                         }
@@ -142,9 +141,9 @@ public class CCL
     {
         List<Integer> neighboringLabels = new ArrayList<Integer>();
 
-        for (int i = pix.Position.y - 1; i <= pix.Position.y + 2 && i < _height - 1; i++)
+        for (int i = pix.y - 1; i <= pix.y + 2 && i < _height - 1; i++)
         {
-            for (int j = pix.Position.x - 1; j <= pix.Position.x + 2 && j < _width - 1; j++)
+            for (int j = pix.x - 1; j <= pix.x + 2 && j < _width - 1; j++)
             {
                 if (i > -1 && j > -1 && _board[j][i] != 0)
                 {
@@ -168,14 +167,14 @@ public class CCL
 
                 if (patternNumber != 0)
                 {
-                    patternNumber = allLabels.get(patternNumber).GetRoot().Name;
+                    patternNumber = allLabels.get(patternNumber).GetRoot().name;
 
                     if (!patterns.containsKey(patternNumber))
                     {
                         patterns.put(patternNumber, new ArrayList<Pixel>());
                     }
 
-                    patterns.get(patternNumber).add(new Pixel(new Point(j, i), Color.BLACK));
+                    patterns.get(patternNumber).add(new Pixel(j, i, _input.getRGB(j, i)));
                 }
             }
         }
@@ -198,7 +197,7 @@ public class CCL
 
         for (Pixel pix : pattern)
         {
-            bmp.setRGB(pix.Position.x - minX, pix.Position.y - minY, pix.color.getRGB());//shift position by minX and minY
+            bmp.setRGB(pix.x - minX, pix.y - minY, pix.color); //shift position by minX and minY
         }
         
         inputGD.drawRect(minX, minY, maxX-minX, maxY-minY);
@@ -239,7 +238,7 @@ public class CCL
     		Map<Integer, BufferedImage> components = ccl.Process(img, bgColor);
     		String format = getFileNameExtension(args[0]);
     		for(Integer c : components.keySet()) {
-    			ImageIO.write(components.get(c), format, new File(getBaseFileName(args[0]) + "-component-" + c + "."  + format));
+    			//ImageIO.write(components.get(c), format, new File(getBaseFileName(args[0]) + "-component-" + c + "."  + format));
     		}
     		ImageIO.write(ccl.getProcessedImage(), format, new File(getBaseFileName(args[0]) + "-processed" + "." + format));
     	} catch(Exception ex) {

@@ -1,7 +1,7 @@
 package org.ml.ccl;
 
 public class Label {
-    public int Name;
+    public int name;
 
     public Label Root;
 
@@ -9,17 +9,17 @@ public class Label {
 
     public Label(int Name)
     {
-        this.Name = Name;
+        this.name = Name;
         this.Root = this;
         this.Rank = 0;
     }
 
     public int getName() {
-		return Name;
+		return name;
 	}
 
 	public void setName(int name) {
-		Name = name;
+		this.name = name;
 	}
 
 	public Label getRoot() {
